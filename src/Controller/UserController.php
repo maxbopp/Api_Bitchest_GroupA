@@ -59,6 +59,7 @@ class UserController extends AbstractController
         
         // infos envoyé à l'utilisateur
         $token = $this->jwtManager->create($User);
+        //Elias
 
         // On lui renvoie un JSON
         return New JsonResponse([
