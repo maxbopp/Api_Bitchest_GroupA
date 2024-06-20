@@ -48,10 +48,18 @@ class UserController extends AbstractController
         // On hache le mot de passe pour qu'il apparraise pas en dur dans la base de donnée 
         $PasswordHashed = $this->PasswordHasher->hashPassword($User, $Password);
 
-        $UserName->setUserName($UserName);
+        if($this->Users->findOneBy(['username' => $UserName])){
+            return New JsonResponse([
+                'status' => false,
+                'message' => 'Ce nom d\'utilisateur est déjà pris.'
+            ],Response::HTTP_CONFLICT);
+        }
+
+        $User->setUserName($UserName);
         $User->setEmail($Email);
         $User->setPassword($PasswordHashed);
         $User->setRoles(['ROLE_USER']);
+        // Ajouter les 500 euros à l'utilisateur quand le wallet sera crée
 
         // le faire persister en bdd
         $this->entityManager->persist($User);
@@ -73,15 +81,18 @@ class UserController extends AbstractController
 
     #[Route('api/user', name: 'app_userInfos',methods: 'GET')]
     public function userInfos(): Response 
-    {
+    {   
+        // On récupère l'utilisateur connécté
         $user = $this->getUser();
 
+        // On récupére les infos utilisateur via un group grâce au serializer
         $userInfos = $this->serializer->serialize($user,'json',['groups' => 'user:read']);
+
+        // On renvoie un json avec les infos utilisateur
         return New JsonResponse([
             'userInfos' => json_decode($userInfos)
         ]);
     }
-    
 
 }
 

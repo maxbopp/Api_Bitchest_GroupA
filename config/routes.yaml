@@ -3,9 +3,6 @@ controllers:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
-    
-api_register:
-    path: /api/register
 
 api_login:
     path: /api/login
