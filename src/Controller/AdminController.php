@@ -67,7 +67,7 @@ class AdminController extends AbstractController
        
        // infos envoyé à l'utilisateur
        $token = $this->jwtManager->create($User);
-       //Elias
+ 
 
        // On lui renvoie un JSON
        return New JsonResponse([
@@ -92,4 +92,36 @@ class AdminController extends AbstractController
            "Utilisateurs" => json_decode($usersInfos)
         ]);
     }  
+
+    #[Route('api/Admin/Password', name: 'AdminModifyPassword', methods : 'POST')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function UpdatePassword(Request $request): Response
+    {
+        $Data = json_decode($request->getContent(), true);      
+
+        $UserId = $Data['id'];
+        $UserPassword = $Data['password'];
+
+        // On récupère l'id de l'utilisateur pour modifier son mdp
+        $UserToModify = $this->Users->find($UserId);
+
+
+        if(!$UserToModify){
+            New JsonResponse([
+                "Statut" => "False",
+                "Message" => "Cette utilisateur n'existe pas !"
+            ], Response::HTTP_NOT_FOUND);
+        };
+        
+        // On hache le mdp pour le sécuriser 
+        $UserPasswordHashed = $this->PasswordHasher->hashPassword($UserToModify, $UserPassword);
+        $UserToModify->setPassword($UserPasswordHashed);
+        $this->entityManager->flush();
+
+        return New JsonResponse([
+            'status' => true,
+            'message' => 'Mot de passe a été mise à jour'
+        ]);
+
+    }
 }
