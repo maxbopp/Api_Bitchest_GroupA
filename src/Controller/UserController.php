@@ -103,7 +103,6 @@ class UserController extends AbstractController
         $UserNewEmail = $Data['email'] ?? null;
         $UserNewName = $Data['username'] ?? null;
         $UserNewPassword = $Data['password'] ?? null;
-        $UserNewRole = $Data['role'] ?? null;
 
         // On récupère l'utilisateur connecté
         $UserConnected = $this->getUser();
@@ -131,24 +130,6 @@ class UserController extends AbstractController
         // Email
         if($UserNewEmail){
             $UserToModify->setEmail($UserNewEmail);
-        }
-        
-        // Role
-        if($UserNewRole){
-            // Role valid pour un utilisateur
-            $ValidRole = ["ROLE_ADMIN","ROLE_USER"];
-            foreach ($UserNewRole as $Role) {
-                // on check si les rôles fourni sont des rôles valides
-                if(!in_array($Role,$ValidRole)){
-                    // si ce n'est pas le cas alors on retourne une réponse
-                    return New JsonResponse([
-                        'status' => false,
-                        'message' => 'Le role fourni n\'est pas valide'
-                    ]);
-                }
-            }
-            // si tous les rôles fourni sont valide alors on modifie
-            $UserToModify->SetRoles($UserNewRole); 
         }
         
         // Username
