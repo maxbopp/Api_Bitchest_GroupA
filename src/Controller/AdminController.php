@@ -93,19 +93,23 @@ class AdminController extends AbstractController
         ]);
     }  
 
-    #[Route('api/Admin/Password', name: 'AdminModifyPassword', methods : 'POST')]
+    #[Route('api/Admin/updateInformation', name: 'AdminUpdateInformation', methods : 'POST')]
     #[IsGranted('ROLE_ADMIN')]
     public function UpdatePassword(Request $request): Response
     {
         $Data = json_decode($request->getContent(), true);      
 
+        // on regarde si l'admin nous fournit c'est informations
         $UserId = $Data['id'];
-        $UserPassword = $Data['password'];
+        $UserNewEmail = $Data['email'] ?? null;
+        $UserNewName = $Data['username'] ?? null;
+        $UserNewPassword = $Data['password'] ?? null;
+        $UserNewRole = $Data['role'] ?? null;
 
         // On récupère l'id de l'utilisateur pour modifier son mdp
         $UserToModify = $this->Users->find($UserId);
 
-
+        // Dans le cas où on ne trouve pas l'utilisateur, on renvoie une erreur
         if(!$UserToModify){
             New JsonResponse([
                 "Statut" => "False",
@@ -113,15 +117,55 @@ class AdminController extends AbstractController
             ], Response::HTTP_NOT_FOUND);
         };
         
-        // On hache le mdp pour le sécuriser 
-        $UserPasswordHashed = $this->PasswordHasher->hashPassword($UserToModify, $UserPassword);
-        $UserToModify->setPassword($UserPasswordHashed);
+        // MDP
+        if($UserNewPassword){
+            // On hache le mdp pour le sécuriser 
+            $UserPasswordHashed = $this->PasswordHasher->hashPassword($UserToModify, $UserNewPassword);
+            // On set le mdp
+            $UserToModify->setPassword($UserPasswordHashed);
+            // On renvoie la réponse 
+        }
+
+        // Email
+        if($UserNewEmail){
+            $UserToModify->setEmail($UserNewEmail);
+        }
+        
+        // Role
+        if($UserNewRole){
+            // Role valid pour un utilisateur
+            $ValidRole = ["ROLE_ADMIN","ROLE_USER"];
+            foreach ($UserNewRole as $Role) {
+                // on check si les rôles fourni sont des rôles valides
+                if(!in_array($Role,$ValidRole)){
+                    // si ce n'est pas le cas alors on retourne une réponse
+                    return New JsonResponse([
+                        'status' => false,
+                        'message' => 'Le role fourni n\'est pas valide'
+                    ]);
+                }
+            }
+            // si tous les rôles fourni sont valide alors on modifie
+            $UserToModify->SetRoles($UserNewRole); 
+        }
+        
+        // Username
+        if($UserNewName){
+            if($this->Users->findOneBy(['username'=> $UserNewName])){
+               return New JsonResponse([
+                    'status' => false,
+                    'message' => 'Ce Nom d\'utilisateur existe déja, veuillez choisir un nouveau'
+               ],Response::HTTP_CONFLICT);
+            }
+            $UserToModify->SetUserName($UserNewName);
+        }
+
         $this->entityManager->flush();
 
         return New JsonResponse([
             'status' => true,
-            'message' => 'Mot de passe a été mise à jour'
-        ]);
+            'message' => 'Les informations on bien été mis à jour'
+       ]);
 
     }
 }
