@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\Users;
+use App\Entity\User;
 use App\Repository\UsersRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,7 +18,7 @@ use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 class AdminController extends AbstractController
 {
     private $entityManager;
-    private $Users;
+    private $User;
     private $PasswordHasher;
     private $jwtManager;
     private $serializer;
@@ -27,7 +27,7 @@ class AdminController extends AbstractController
     {   
         // Fonctionalités et bundle utilisé dans le controller 
         $this->entityManager = $entityManager;
-        $this->Users = $Users;
+        $this->User = $Users;
         $this->jwtManager = $jwtManager;
         $this->PasswordHasher = $PasswordHasher;
         $this->serializer = $serializer;
@@ -40,33 +40,33 @@ class AdminController extends AbstractController
        $Data = json_decode($request->getContent(), true);
 
        // initialise un nouveau user 
-       $User = New Users();
+       $NewUser = New User();
 
        $Email = $Data['email'];
        $UserName = $Data['username'];
        $Password = $Data['password'];
        // On hache le mot de passe pour qu'il apparraise pas en dur dans la base de donnée 
-       $PasswordHashed = $this->PasswordHasher->hashPassword($User, $Password);
+       $PasswordHashed = $this->PasswordHasher->hashPassword($NewUser, $Password);
 
-       if($this->Users->findOneBy(['username' => $UserName])){
+       if($this->User->findOneBy(['username' => $UserName])){
            return New JsonResponse([
                'status' => false,
                'message' => 'Ce nom d\'utilisateur est déjà pris.'
            ],Response::HTTP_CONFLICT);
        }
 
-       $User->setUserName($UserName);
-       $User->setEmail($Email);
-       $User->setPassword($PasswordHashed);
-       $User->setRoles(['ROLE_ADMIN']);
+       $NewUser->setUserName($UserName);
+       $NewUser->setEmail($Email);
+       $NewUser->setPassword($PasswordHashed);
+       $NewUser->setRoles(['ROLE_ADMIN']);
        // Ajouter les 500 euros à l'utilisateur quand le wallet sera crée
 
        // le faire persister en bdd
-       $this->entityManager->persist($User);
+       $this->entityManager->persist($NewUser);
        $this->entityManager->flush();
        
        // infos envoyé à l'utilisateur
-       $token = $this->jwtManager->create($User);
+       $token = $this->jwtManager->create($NewUser);
  
 
        // On lui renvoie un JSON
@@ -84,14 +84,14 @@ class AdminController extends AbstractController
     public function AdminDashboard(): Response
     {   
         // On récupère tous les utilisateurs
-        $users = $this->Users->findAll();
+        $users = $this->User->findAll();
         // On serialise les utilsateurs 
         $usersInfos = $this->serializer->serialize($users,'json',['groups' => 'user:read']);
         // On retourne les urtilisateurs
         return New JsonResponse([
            "Utilisateurs" => json_decode($usersInfos)
         ]);
-    }  
+    }   
 
     #[Route('api/Admin/updateInformation', name: 'AdminUpdateInformation', methods : 'POST')]
     #[IsGranted('ROLE_ADMIN')]
@@ -107,7 +107,7 @@ class AdminController extends AbstractController
         $UserNewRole = $Data['role'] ?? null;
 
         // On récupère l'id de l'utilisateur pour modifier son mdp
-        $UserToModify = $this->Users->find($UserId);
+        $UserToModify = $this->User->find($UserId);
 
         // Dans le cas où on ne trouve pas l'utilisateur, on renvoie une erreur
         if(!$UserToModify){
@@ -151,7 +151,7 @@ class AdminController extends AbstractController
         
         // Username
         if($UserNewName){
-            if($this->Users->findOneBy(['username'=> $UserNewName])){
+            if($this->User->findOneBy(['username'=> $UserNewName])){
                return New JsonResponse([
                     'status' => false,
                     'message' => 'Ce Nom d\'utilisateur existe déja, veuillez choisir un nouveau'
@@ -167,5 +167,35 @@ class AdminController extends AbstractController
             'message' => 'Les informations on bien été mis à jour'
        ]);
 
+    }
+
+    #[Route('api/Admin/DeleteUser', name: 'AdminDeleteUser', methods : 'POST')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function DeleteUser(Request $request): JsonResponse
+    {
+        $Data = json_decode($request->getContent(), true); 
+
+        // Id de L'utilisateur à supprimer
+        $UserIdToDelete = $Data['id'];
+
+        // On regarde si l'utilisateur existe dans la bdd
+        if(!$this->User->find($UserIdToDelete)){
+            return New JsonResponse([
+                'status' => 'false',
+                'message' => 'l\'tilisateur n\'existe pas'
+            ]);
+        }else{
+            $UserToDelete = $this->User->find($UserIdToDelete);
+        }
+
+        // on suprime l'utilisateur
+        $this->entityManager->remove($UserToDelete);
+        $this->entityManager->flush();    
+
+        // On renvoie la réponse
+        New JsonResponse([
+            'status' => 'true',
+            'message' => 'L\'utilisateur a bien été supprimé' 
+        ]);
     }
 }
