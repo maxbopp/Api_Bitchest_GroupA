@@ -50,7 +50,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column]
     #[Gedmo\Timestampable(on:"update")]
-    private ?\DateTimeImmutable $UpdateAt = null;
+    private ?\DateTimeImmutable $UpdatedAt = null;
 
     public function getId(): ?int
     {
@@ -165,12 +165,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getUpdateAt(): ?\DateTimeImmutable
     {
-        return $this->UpdateAt;
+        return $this->UpdatedAt;
     }
 
-    public function setUpdateAt(\DateTimeImmutable $UpdateAt): static
+    public function setUpdateAt(\DateTimeImmutable $UpdatedAt): static
     {
-        $this->UpdateAt = $UpdateAt;
+        $this->UpdatedAt = $UpdatedAt;
 
         return $this;
     }

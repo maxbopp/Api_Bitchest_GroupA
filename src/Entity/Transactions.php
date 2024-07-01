@@ -33,7 +33,7 @@ class Transactions
 
     #[ORM\Column]
     #[Gedmo\Timestampable(on:"create")]
-    private ?\DateTimeImmutable $UpdateAt = null;
+    private ?\DateTimeImmutable $UpdatedAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'Transactions')]
     private ?Wallet $wallet = null;
@@ -105,12 +105,12 @@ class Transactions
 
     public function getUpdateAt(): ?\DateTimeImmutable
     {
-        return $this->UpdateAt;
+        return $this->UpdatedAt;
     }
 
-    public function setUpdateAt(\DateTimeImmutable $UpdateAt): static
+    public function setUpdateAt(\DateTimeImmutable $UpdatedAt): static
     {
-        $this->UpdateAt = $UpdateAt;
+        $this->UpdatedAt = $UpdatedAt;
 
         return $this;
     }

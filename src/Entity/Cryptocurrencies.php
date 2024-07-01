@@ -23,7 +23,7 @@ class Cryptocurrencies
 
     #[ORM\Column]
     #[Gedmo\Timestampable(on:"update")]
-    private ?\DateTimeImmutable $UpdateAt = null;
+    private ?\DateTimeImmutable $UpdatedAt = null;
 
     #[ORM\Column(length: 255)]
     private ?string $symbol = null;
@@ -59,12 +59,12 @@ class Cryptocurrencies
 
     public function getUpdateAt(): ?\DateTimeImmutable
     {
-        return $this->UpdateAt;
+        return $this->UpdatedAt;
     }
 
-    public function setUpdateAt(\DateTimeImmutable $UpdateAt): static
+    public function setUpdateAt(\DateTimeImmutable $UpdatedAt): static
     {
-        $this->UpdateAt = $UpdateAt;
+        $this->UpdatedAt = $UpdatedAt;
 
         return $this;
     }
