@@ -28,14 +28,15 @@ class Transactions
     private ?string $total = null;
 
     #[ORM\Column]
-    #[Gedmo\Timestampable(on:"create")]
+    #[Gedmo\Timestampable(on: "create")]
     private ?\DateTimeImmutable $CreatedAt = null;
 
     #[ORM\Column]
-    #[Gedmo\Timestampable(on:"create")]
+    #[Gedmo\Timestampable(on: "update")]
     private ?\DateTimeImmutable $UpdatedAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'Transactions')]
+    #[ORM\JoinColumn(nullable: false)]
     private ?Wallet $wallet = null;
 
     public function getId(): ?int
@@ -103,12 +104,12 @@ class Transactions
         return $this;
     }
 
-    public function getUpdateAt(): ?\DateTimeImmutable
+    public function getUpdatedAt(): ?\DateTimeImmutable
     {
         return $this->UpdatedAt;
     }
 
-    public function setUpdateAt(\DateTimeImmutable $UpdatedAt): static
+    public function setUpdatedAt(\DateTimeImmutable $UpdatedAt): static
     {
         $this->UpdatedAt = $UpdatedAt;
 

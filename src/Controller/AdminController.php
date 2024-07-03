@@ -3,7 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Entity\Wallet;
 use App\Repository\UsersRepository;
+use App\Repository\WalletRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,8 +24,9 @@ class AdminController extends AbstractController
     private $PasswordHasher;
     private $jwtManager;
     private $serializer;
+    private $Wallet;
 
-    public function __construct(EntityManagerInterface $entityManager, UsersRepository $Users,JWTTokenManagerInterface $jwtManager, UserPasswordHasherInterface $PasswordHasher, SerializerInterface $serializer)
+    public function __construct(EntityManagerInterface $entityManager, UsersRepository $Users,JWTTokenManagerInterface $jwtManager, UserPasswordHasherInterface $PasswordHasher, SerializerInterface $serializer, WalletRepository $Wallet)
     {   
         // Fonctionalités et bundle utilisé dans le controller 
         $this->entityManager = $entityManager;
@@ -31,6 +34,7 @@ class AdminController extends AbstractController
         $this->jwtManager = $jwtManager;
         $this->PasswordHasher = $PasswordHasher;
         $this->serializer = $serializer;
+        $this->Wallet = $Wallet;
     }
 
     #[Route('api/hiden/CreateAdmin', name: 'AdminCreation', methods : 'POST')]
@@ -51,7 +55,7 @@ class AdminController extends AbstractController
        if($this->User->findOneBy(['username' => $UserName])){
            return New JsonResponse([
                'status' => false,
-               'message' => 'Ce nom d\'utilisateur est déjà pris.'
+               'message' => 'This username is already taken.'
            ],Response::HTTP_CONFLICT);
        }
 
@@ -59,12 +63,18 @@ class AdminController extends AbstractController
        $NewUser->setEmail($Email);
        $NewUser->setPassword($PasswordHashed);
        $NewUser->setRoles(['ROLE_ADMIN']);
-       // Ajouter les 500 euros à l'utilisateur quand le wallet sera crée
+       
+       // Il faut auusi initailiser le wallet de l'utilisateur 
+       $UserWallet = New Wallet;
+       // On ajoute les 500 
+       $UserWallet->setBalance(500);
+       // on ajoute un Wallet 
+       $NewUser->setWallet($UserWallet);
 
        // le faire persister en bdd
        $this->entityManager->persist($NewUser);
        $this->entityManager->flush();
-       
+
        // infos envoyé à l'utilisateur
        $token = $this->jwtManager->create($NewUser);
  
@@ -72,7 +82,7 @@ class AdminController extends AbstractController
        // On lui renvoie un JSON
        return New JsonResponse([
            'status' => true,
-           'message'=> 'Votre compte à bien été crée!',
+           'message'=> 'Your account have been create !',
            'Token' => $token,
            'UserName' => $UserName,
        ]);
@@ -113,7 +123,7 @@ class AdminController extends AbstractController
         if(!$UserToModify){
             New JsonResponse([
                 "Statut" => "False",
-                "Message" => "Cette utilisateur n'existe pas !"
+                "Message" => "This user doesn't exist !"
             ], Response::HTTP_NOT_FOUND);
         };
         
@@ -141,7 +151,7 @@ class AdminController extends AbstractController
                     // si ce n'est pas le cas alors on retourne une réponse
                     return New JsonResponse([
                         'status' => false,
-                        'message' => 'Le role fourni n\'est pas valide'
+                        'message' => 'The role is not valid !'
                     ]);
                 }
             }
@@ -154,7 +164,7 @@ class AdminController extends AbstractController
             if($this->User->findOneBy(['username'=> $UserNewName])){
                return New JsonResponse([
                     'status' => false,
-                    'message' => 'Ce Nom d\'utilisateur existe déja, veuillez choisir un nouveau'
+                    'message' => 'This username is already taken, choose another one !'
                ],Response::HTTP_CONFLICT);
             }
             $UserToModify->SetUserName($UserNewName);
@@ -164,7 +174,7 @@ class AdminController extends AbstractController
 
         return New JsonResponse([
             'status' => true,
-            'message' => 'Les informations on bien été mis à jour'
+            'message' => 'Your information have been updated !'
        ]);
 
     }
@@ -182,7 +192,7 @@ class AdminController extends AbstractController
         if(!$this->User->find($UserIdToDelete)){
             return New JsonResponse([
                 'status' => 'false',
-                'message' => 'l\'tilisateur n\'existe pas'
+                'message' => 'This user doesn\'t exist !'
             ]);
         }else{
             $UserToDelete = $this->User->find($UserIdToDelete);
@@ -193,9 +203,9 @@ class AdminController extends AbstractController
         $this->entityManager->flush();    
 
         // On renvoie la réponse
-        New JsonResponse([
+        return New JsonResponse([
             'status' => 'true',
-            'message' => 'L\'utilisateur a bien été supprimé' 
+            'message' => 'The user have been deleted !' 
         ]);
     }
 }

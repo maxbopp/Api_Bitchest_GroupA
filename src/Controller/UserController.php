@@ -77,7 +77,6 @@ class UserController extends AbstractController
 
         // le faire persister en bdd
         $this->entityManager->persist($NewUser);
-        $this->entityManager->persist($UserWallet);
         $this->entityManager->flush();
         
         // On lui renvoie un JSON
