@@ -25,17 +25,20 @@ function getCotationFor($cryptoname){
 function GeneratedPriceAndVariationForCryptoOn30days(){
   $CrytoName = ['Bitcoin','Ethereum','Ripple','Bitcoin Cash','Cardano','Litecoin','NEM','Stellar','IOTA','Dash'];
   $CrytosPriceAndVariations = [];
-  $Variations = [];
-
   // On crée une classe pour les coins
   class Coins {
+    public $name;
     public $price;
     public $Variations; 
   }
-  // On instacie un nouveau coin
-  $Coin = New Coins;
+ 
   // On boucle sur les cryptos
   foreach ($CrytoName as $crypto) {
+    $Variations = [];
+    // On instacie un nouveau coin
+    $Coin = New Coins;
+    // On donne le nom au bitcoins
+    $Coin->name = $crypto;
     // On génére un prix 
     $Coin->price = getFirstCotation($crypto);
     // On va générer la cotation sur 30 jours
@@ -47,7 +50,7 @@ function GeneratedPriceAndVariationForCryptoOn30days(){
     // On set les variations
     $Coin->Variations = $Variations;
     // On ajoute le bitCoins au tableaux
-    $CrytosPriceAndVariations[] = $Coin;
+    $CrytosPriceAndVariations[$crypto] = $Coin;
   }
   // On retourne le tableau des cryptos avec leurs prix et leurs variations sur 30 jours
   return $CrytosPriceAndVariations;

@@ -33,7 +33,7 @@ class Cryptos
     /**
      * @var Collection<int, CryptoCotations>
      */
-    #[ORM\OneToMany(targetEntity: CryptoCotations::class, mappedBy: 'cryptos', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: CryptoCotations::class, mappedBy: 'cryptos', orphanRemoval: true, cascade: ['persist','remove'])]
     private Collection $Cotations;
 
     public function __construct()
