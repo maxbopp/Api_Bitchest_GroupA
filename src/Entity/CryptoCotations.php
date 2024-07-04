@@ -2,45 +2,46 @@
 
 namespace App\Entity;
 
-use App\Repository\CryptocurrenciesRepository;
+use App\Repository\CryptoCotationsRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
-#[ORM\Entity(repositoryClass: CryptocurrenciesRepository::class)]
-class Cryptocurrencies
+#[ORM\Entity(repositoryClass: CryptoCotationsRepository::class)]
+class CryptoCotations
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $name = null;
+    #[ORM\Column]
+    private ?float $Cotation = null;
 
     #[ORM\Column]
-    #[Gedmo\Timestampable(on:"create")]
+    #[Gedmo\Timestampable(on: "create")]
     private ?\DateTimeImmutable $CreatedAt = null;
 
     #[ORM\Column]
-    #[Gedmo\Timestampable(on:"update")]
+    #[Gedmo\Timestampable(on: "update")]
     private ?\DateTimeImmutable $UpdatedAt = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $symbol = null;
+    #[ORM\ManyToOne(inversedBy: 'Cotations')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Cryptos $cryptos = null;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getName(): ?string
+    public function getCotation(): ?float
     {
-        return $this->name;
+        return $this->Cotation;
     }
 
-    public function setName(string $name): static
+    public function setCotation(float $Cotation): static
     {
-        $this->name = $name;
+        $this->Cotation = $Cotation;
 
         return $this;
     }
@@ -57,26 +58,26 @@ class Cryptocurrencies
         return $this;
     }
 
-    public function getUpdateAt(): ?\DateTimeImmutable
+    public function getUpdatedAt(): ?\DateTimeImmutable
     {
         return $this->UpdatedAt;
     }
 
-    public function setUpdateAt(\DateTimeImmutable $UpdatedAt): static
+    public function setUpdatedAt(\DateTimeImmutable $UpdatedAt): static
     {
         $this->UpdatedAt = $UpdatedAt;
 
         return $this;
     }
 
-    public function getSymbol(): ?string
+    public function getCryptos(): ?Cryptos
     {
-        return $this->symbol;
+        return $this->cryptos;
     }
 
-    public function setSymbol(string $symbol): static
+    public function setCryptos(?Cryptos $cryptos): static
     {
-        $this->symbol = $symbol;
+        $this->cryptos = $cryptos;
 
         return $this;
     }

@@ -2,22 +2,22 @@
 
 namespace App\Repository;
 
-use App\Entity\Cryptocurrencies;
+use App\Entity\Cryptos;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Cryptocurrencies>
+ * @extends ServiceEntityRepository<Cryptos>
  */
-class CryptocurrenciesRepository extends ServiceEntityRepository
+class CryptosRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Cryptocurrencies::class);
+        parent::__construct($registry, Cryptos::class);
     }
 
     //    /**
-    //     * @return Cryptocurrencies[] Returns an array of Cryptocurrencies objects
+    //     * @return Cryptos[] Returns an array of Cryptos objects
     //     */
     //    public function findByExampleField($value): array
     //    {
@@ -31,7 +31,7 @@ class CryptocurrenciesRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?Cryptocurrencies
+    //    public function findOneBySomeField($value): ?Cryptos
     //    {
     //        return $this->createQueryBuilder('c')
     //            ->andWhere('c.exampleField = :val')

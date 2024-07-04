@@ -16,6 +16,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use function PasswordGenerator\GeneratePassword;
 
 class AdminController extends AbstractController
 {
@@ -208,4 +209,52 @@ class AdminController extends AbstractController
             'message' => 'The user have been deleted !' 
         ]);
     }
+
+    #[Route('api/Admin/CreateUser', name: 'AdminCreateUser', methods : 'POST')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function CreateUserFromAdmin(Request $request) : JsonResponse
+    {
+        $Data = json_decode($request->getContent(), true); 
+
+        // initialise un nouveau user 
+       $NewUser = New User();
+
+       $UserName = $Data['username'];
+       $Email = $Data['email'];
+        // On va générer a mot passe pour l'utilisateur qu'on va crée
+       $GeneratedPassword = GeneratePassword();
+       // On hache le mot de passe pour qu'il apparraise pas en dur dans la base de donnée 
+       $PasswordHashed = $this->PasswordHasher->hashPassword($NewUser, $GeneratedPassword);
+
+       if($this->User->findOneBy(['username' => $UserName])){
+           return New JsonResponse([
+               'status' => false,
+               'message' => 'This username is already taken.'
+           ],Response::HTTP_CONFLICT);
+       }
+
+       $NewUser->setUserName($UserName);
+       $NewUser->setEmail($Email);
+       $NewUser->setPassword($PasswordHashed);
+       $NewUser->setRoles(['ROLE_USER']);
+       
+       // Il faut auusi initailiser le wallet de l'utilisateur 
+       $UserWallet = New Wallet;
+       // On ajoute les 500 
+       $UserWallet->setBalance(500);
+       // on ajoute un Wallet 
+       $NewUser->setWallet($UserWallet);
+
+       // le faire persister en bdd
+       $this->entityManager->persist($NewUser);
+       $this->entityManager->flush();
+
+       // On lui renvoie un JSON
+       return New JsonResponse([
+            'status' => true,
+            'message'=> 'Your account have been create !',
+            'password' => $GeneratedPassword
+       ]);
+    }
+
 }
