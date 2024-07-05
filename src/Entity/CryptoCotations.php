@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\CryptoCotationsRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: CryptoCotationsRepository::class)]
 class CryptoCotations
@@ -12,21 +13,26 @@ class CryptoCotations
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups('user:cotations')]
     private ?int $id = null;
 
     #[ORM\Column]
+    #[Groups('user:cotations')]
     private ?float $Cotation = null;
 
     #[ORM\Column]
     #[Gedmo\Timestampable(on: "create")]
+    #[Groups('user:cotations')]
     private ?\DateTimeImmutable $CreatedAt = null;
 
     #[ORM\Column]
     #[Gedmo\Timestampable(on: "update")]
+    #[Groups('user:cotations')]
     private ?\DateTimeImmutable $UpdatedAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'Cotations')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups('user:cotations')]
     private ?Cryptos $cryptos = null;
 
     public function getId(): ?int

@@ -33,9 +33,16 @@ class Wallet
     #[ORM\OneToMany(targetEntity: Transactions::class, mappedBy: 'wallet')]
     private Collection $Transactions;
 
+    /**
+     * @var Collection<int, CryptoWallet>
+     */
+    #[ORM\OneToMany(targetEntity: CryptoWallet::class, mappedBy: 'wallet')]
+    private Collection $CryptoWallet;
+
     public function __construct()
     {
         $this->Transactions = new ArrayCollection();
+        $this->CryptoWallet = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -103,6 +110,36 @@ class Wallet
             // set the owning side to null (unless already changed)
             if ($transaction->getWallet() === $this) {
                 $transaction->setWallet(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CryptoWallet>
+     */
+    public function getCryptoWallet(): Collection
+    {
+        return $this->CryptoWallet;
+    }
+
+    public function addCryptoWallet(CryptoWallet $cryptoWallet): static
+    {
+        if (!$this->CryptoWallet->contains($cryptoWallet)) {
+            $this->CryptoWallet->add($cryptoWallet);
+            $cryptoWallet->setWallet($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCryptoWallet(CryptoWallet $cryptoWallet): static
+    {
+        if ($this->CryptoWallet->removeElement($cryptoWallet)) {
+            // set the owning side to null (unless already changed)
+            if ($cryptoWallet->getWallet() === $this) {
+                $cryptoWallet->setWallet(null);
             }
         }
 

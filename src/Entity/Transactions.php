@@ -39,6 +39,9 @@ class Transactions
     #[ORM\JoinColumn(nullable: false)]
     private ?Wallet $wallet = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $Crypto = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -124,6 +127,18 @@ class Transactions
     public function setWallet(?Wallet $wallet): static
     {
         $this->wallet = $wallet;
+
+        return $this;
+    }
+
+    public function getCrypto(): ?string
+    {
+        return $this->Crypto;
+    }
+
+    public function setCrypto(string $Crypto): static
+    {
+        $this->Crypto = $Crypto;
 
         return $this;
     }
